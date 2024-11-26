@@ -12,7 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 
 class RootPage extends StatefulWidget {
-  const RootPage({Key? key}) : super(key: key);
+  const RootPage({Key? key, required String username, required String email}) : super(key: key);
 
   @override
   State<RootPage> createState() => _RootPageState();

@@ -40,7 +40,7 @@ class Plant {
         humidity: 34,
         temperature: '23 - 34',
         imageURL: 'assets/images/plant-one.png',
-        isFavorated: true,
+        isFavorated: false,
         decription:
         'This plant is one of the best plant. It grows in most of the regions in the world and can survive'
             'even the harshest weather condition.',
@@ -56,6 +56,7 @@ class Plant {
         temperature: '19 - 22',
         imageURL: 'assets/images/plant-two.png',
         isFavorated: false,
+        
         decription:
         'This plant is one of the best plant. It grows in most of the regions in the world and can survive'
             'even the harshest weather condition.',
@@ -74,7 +75,7 @@ class Plant {
         decription:
         'This plant is one of the best plant. It grows in most of the regions in the world and can survive'
             'even the harshest weather condition.',
-        isSelected: false),
+        isSelected:false),
     Plant(
         plantId: 3,
         price: 30,
@@ -100,7 +101,7 @@ class Plant {
         humidity: 66,
         temperature: '12 - 16',
         imageURL: 'assets/images/plant-four.png',
-        isFavorated: true,
+        isFavorated: false,
         decription:
         'This plant is one of the best plant. It grows in most of the regions in the world and can survive'
             'even the harshest weather condition.',
@@ -173,14 +174,14 @@ class Plant {
 
   //Get the favorated items
   static List<Plant> getFavoritedPlants(){
-    List<Plant> _travelList = Plant.plantList;
-    return _travelList.where((element) => element.isFavorated == true).toList();
+    List<Plant> travelList = Plant.plantList;
+    return travelList.where((element) => element.isFavorated == true).toList();
   }
 
   //Get the cart items
   static List<Plant> addedToCartPlants(){
-    List<Plant> _selectedPlants = Plant.plantList;
-    return _selectedPlants.where((element) => element.isSelected == true).toList();
+    List<Plant> selectedPlants = Plant.plantList;
+    return selectedPlants.where((element) => element.isSelected == true).toList();
   }
 
 }

@@ -1,176 +1,196 @@
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:fianl_project/constants.dart';
 import 'package:fianl_project/ui/screens/widgets/profile_widget.dart';
-import 'package:flutter/material.dart';
 
-class ProfilePage extends StatelessWidget {
-   ProfilePage({Key? key}) : super(key: key);
+class ProfilePage extends StatefulWidget {
+  @override
+  _ProfilePageState createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  late String name;
+  late String email;
+  String? imagePath; // متغير لتخزين مسار الصورة
+  bool isEditingName = false;
+  bool isEditingEmail = false;
+
+  final ImagePicker _picker = ImagePicker();
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    // تعيين قيم افتراضية
+    name = 'أحمد محمد';
+    email = 'ahmed.mohamed@example.com';
+    nameController.text = name;
+    emailController.text = email;
+  }
+
+  Future<void> _pickImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        imagePath = pickedFile.path; // تحديث مسار الصورة
+      });
+    }
+  }
+
+  void saveChanges() {
+    setState(() {
+      name = nameController.text; // تحديث الاسم
+      email = emailController.text; // تحديث البريد الإلكتروني
+      isEditingName = false;
+      isEditingEmail = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     return Scaffold(
-        body: SingleChildScrollView(
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        height: size.height,
-        width: size.width,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Container(
-              width: 150,
-              child: const CircleAvatar(
-                radius: 60,
-                backgroundImage: ExactAssetImage('assets/images/profile.jpg'),
-              ),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: Constants.primaryColor.withOpacity(.5),
-                  width: 5.0,
-                ),
-              ),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            SizedBox(
-              width: size.width * .3,
-              child: Row(
-                children: [
-                  Text(
-                    'John Doe',
-                    style: TextStyle(
-                      color: Constants.blackColor,
-                      fontSize: 20,
+      body: SingleChildScrollView(
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          height: size.height,
+          width: size.width,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              GestureDetector(
+                onTap: _pickImage, // استدعاء الدالة عند الضغط على الصورة
+                child: Container(
+                  width: 150,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: Constants.primaryColor.withOpacity(.5),
+                      width: 5.0,
                     ),
                   ),
-                  SizedBox(
-                      height: 24,
-                      child: Image.asset("assets/images/verified.png")),
-                ],
-              ),
-            ),
-            Text(
-              'johndoe@gmail.com',
-              style: TextStyle(
-                color: Constants.blackColor.withOpacity(.3),
-              ),
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            ElevatedButton.icon(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => EditProfilePage()),
-                );
-              },
-              icon: Icon(Icons.edit, color: Colors.white),
-              label: Text('Edit Profile', selectionColor: Colors.white,),
-            
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Constants.primaryColor, // Button color
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  child: CircleAvatar(
+                    radius: 60,
+                    backgroundImage: imagePath != null
+                        ? FileImage(File(imagePath!)) // استخدام الصورة الجديدة
+                        : ExactAssetImage('assets/images/profile.jpg'), // الصورة الافتراضية
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(
-              height: 30,
-            ),
-            SizedBox(
-              height: size.height * .7,
-              width: size.width,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: const [
-                  ProfileWidget(
-                    icon: Icons.person,
-                    title: 'My Profile',
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: isEditingName
+                        ? TextField(
+                            controller: nameController,
+                            decoration: InputDecoration(
+                              hintText: 'أدخل الاسم',
+                              border: OutlineInputBorder(),
+                            ),
+                          )
+                        : Text(
+                            name,
+                            style: TextStyle(
+                              color: Constants.blackColor,
+                              fontSize: 20,
+                            ),
+                          ),
                   ),
-                  ProfileWidget(
-                    icon: Icons.settings,
-                    title: 'Settings',
-                  ),
-                  ProfileWidget(
-                    icon: Icons.notifications,
-                    title: 'Notifications',
-                  ),
-                  ProfileWidget(
-                    icon: Icons.chat,
-                    title: 'FAQs',
-                  ),
-                  ProfileWidget(
-                    icon: Icons.share,
-                    title: 'Share',
-                  ),
-                  ProfileWidget(
-                    icon: Icons.logout,
-                    title: 'Log Out',
+                  IconButton(
+                    icon: Icon(
+                      isEditingName ? Icons.check : Icons.edit,
+                      color: Constants.primaryColor,
+                    ),
+                    onPressed: () {
+                      if (isEditingName) {
+                        saveChanges(); // حفظ التغييرات عند الضغط على علامة الصح
+                      } else {
+                        setState(() {
+                          isEditingName = true; // تفعيل وضع التحرير
+                        });
+                      }
+                    },
                   ),
                 ],
               ),
-            ),
-          ],
-        ),
-      ),
-    ));
-  }
-}
-
-class EditProfilePage extends StatelessWidget {
-  final TextEditingController nameController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
-
-  EditProfilePage({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Edit Profile"),
-        backgroundColor: Constants.primaryColor,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: InputDecoration(
-                labelText: "Name",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: isEditingEmail
+                        ? TextField(
+                            controller: emailController,
+                            decoration: InputDecoration(
+                              hintText: 'أدخل البريد الإلكتروني',
+                              border: OutlineInputBorder(),
+                            ),
+                          )
+                        : Text(
+                            email,
+                            style: TextStyle(
+                              color: Constants.blackColor.withOpacity(.3),
+                            ),
+                          ),
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      isEditingEmail ? Icons.check : Icons.edit,
+                      color: Constants.primaryColor,
+                    ),
+                    onPressed: () {
+                      if (isEditingEmail) {
+                        saveChanges(); // حفظ التغييرات عند الضغط على علامة الصح
+                      } else {
+                        setState(() {
+                          isEditingEmail = true; // تفعيل وضع التحرير
+                        });
+                      }
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              // بقية المحتوى مثل الأزرار أو الخيارات الأخرى
+              SizedBox(
+                height: size.height * .7,
+                width: size.width,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: const [
+                    ProfileWidget(
+                      icon: Icons.person,
+                      title: 'My Profile',
+                    ),
+                    ProfileWidget(
+                      icon: Icons.settings,
+                      title: 'Settings',
+                    ),
+                    ProfileWidget(
+                      icon: Icons.notifications,
+                      title: 'Notifications',
+                    ),
+                    ProfileWidget(
+                      icon: Icons.chat,
+                      title: 'FAQs',
+                    ),
+                    ProfileWidget(
+                      icon: Icons.share,
+                      title: 'Share',
+                    ),
+                    ProfileWidget(
+                      icon: Icons.logout,
+                      title: 'Log Out',
+                    ),
+                  ],
                 ),
               ),
-            ),
-            const SizedBox(height: 20),
-            TextField(
-              controller: emailController,
-              decoration: InputDecoration(
-                labelText: "Email",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                // Save updated profile information logic here
-                Navigator.pop(context); // Return to profile page
-              },
-              child: const Text("Save Changes"),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Constants.primaryColor,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
